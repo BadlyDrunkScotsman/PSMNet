@@ -72,6 +72,9 @@ def main():
             model = nn.DataParallel(model, device_ids=[0])
             model.cuda()
 
+        state_dict = torch.load(model_path)
+        model.load_state_dict(state_dict['state_dict'])
+
         normal_mean_var = {'mean': [0.485, 0.456, 0.406],
                             'std': [0.229, 0.224, 0.225]}
         infer_transform = transforms.Compose([transforms.ToTensor(),
