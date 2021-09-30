@@ -26,29 +26,26 @@ def dataloader(filepath):
     dir = filepath
     dir_disp = filepath + '/cam_dep_60/'
 
-    evaldir = filepath + '/SampleSet_ds_b30_fov120/'
-    evaldir_disp = filepath + '/SampleSet_ds_b30_fov120/disp/'
-
     subdir = ['/cam_60/', '/cam_60_15bs/']
-    imm_l = os.listdir(dir + subdir[0])
-    for im in imm_l:
-        if is_image_file(dir + subdir[0] + im):
-            all_left_img.append(dir + subdir[0] + im)
 
-        all_left_disp.append(dir_disp + im)
+    train_file = open(os.path.join(dir, 'train.txt'), 'r')
+    valid_file = open(os.path.join(dir, 'valid.txt'), 'r')
 
-        if is_image_file(dir + subdir[1] + im):
-            all_right_img.append(dir + subdir[1] + im)
+    train_lines = train_file.readlines()
+    valid_lines = valid_file.readlines()
 
-    subdir = ['/left/', '/right/']
-    imm_l = os.listdir(evaldir + subdir[0])
-    for im in imm_l:
-        if is_image_file(evaldir + subdir[0] + im):
-            eval_left_img.append(evaldir + subdir[0] + im)
+    for line in train_lines:
+        line = line.strip()
 
-        eval_left_disp.append(evaldir_disp + im)
+        all_left_img.append(dir + subdir[0] + line)
+        all_left_disp.append(dir_disp + line)
+        all_right_img.append(dir + subdir[1] + line)
 
-        if is_image_file(evaldir + subdir[1] + im):
-            eval_right_img.append(evaldir + subdir[0] + im)
+    for line in valid_lines:
+        line = line.strip()
+
+        eval_left_img.append(dir + subdir[0] + line)
+        eval_left_disp.append(dir_disp + line)
+        eval_right_img.append(dir + subdir[1] + line)
 
     return all_left_img, all_right_img, all_left_disp, eval_left_img, eval_right_img, eval_left_disp
