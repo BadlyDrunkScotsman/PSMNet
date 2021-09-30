@@ -58,7 +58,7 @@ def main():
 
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/modele/PSMnet/fov60_bs15.tar'
+    model_path = '/mnt/host/SSD/VIDAR/modele/PSMnet/fov60_bs15_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
     datapath = '/mnt/host/SSD/VIDAR/dane/croped_ds_15b_fov60'
