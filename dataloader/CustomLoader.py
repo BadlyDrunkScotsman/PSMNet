@@ -82,16 +82,6 @@ class myImageFloder(data.Dataset):
             return left_img, right_img, dataL
         else:
             w, h = left_img.size
-            th, tw = 512, 1024
-
-            x1 = 500
-            y1 = 500
-
-            left_img = left_img.crop((x1, y1, x1 + tw, y1 + th))
-            right_img = right_img.crop((x1, y1, x1 + tw, y1 + th))
-
-            dataL = dataL[y1:y1 + th, x1:x1 + tw]
-
             left_img = processed(left_img)
             right_img = processed(right_img)
 
