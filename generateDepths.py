@@ -17,12 +17,9 @@ from models import *
 
 from clearml import Task, Logger
 
-from models.upscaling.upscaling_model import Generator
 import torchvision.transforms as transforms
 from PIL import Image
 
-
-from utils.imgproc import *
 
 import os
 import os.path
@@ -30,7 +27,6 @@ import os.path
 def ugly_hack():
     oh = run(["apt-get", "update"])
     no = run("apt-get install ffmpeg libsm6 libxext6 -y".split(" "))
-
 
 def switch_to_poziomka(task):
     if task.running_locally():
