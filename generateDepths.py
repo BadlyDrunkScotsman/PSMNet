@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import argparse
 import time
+import numpy
 
 import torch
 import torch.nn as nn
@@ -16,8 +17,12 @@ from models import *
 
 from clearml import Task, Logger
 
+from models.upscaling.upscaling_model import Generator
+import torchvision.transforms as transforms
 from PIL import Image
 
+
+from utils.imgproc import *
 
 import os
 import os.path
@@ -34,6 +39,7 @@ def switch_to_poziomka(task):
         config['script']['repository'] = config['script']['repository'].replace("gitlab.com:", "gitlab.com-vidar:")
         task.update_task(config)
         task.execute_remotely(queue_name="default")
+
 
 def test(imgL, imgR, model, cuda):
     model.eval()
@@ -52,22 +58,29 @@ def test(imgL, imgR, model, cuda):
 
 
 def main():
-    task = Task.init("SR-PSMNET", "multi Depth-map generator")
+    task = Task.init("PSMNET", "multi Depth-map generation")
     switch_to_poziomka(task)
     ugly_hack()
 
+    import cv2
+
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
+    model_path = '/mnt/host/SSD/VIDAR/trash/pretrained_model_KITTI2015.tar'
     model_type = 'stackhourglass'
-    datatype = 'custom'
-    datapath = '/mnt/host/SSD/VIDAR/dane/croped_ds_15b_fov60'
+    datatype = '2015'
+    datapath = '/mnt/host/SSD/VIDAR/dane/kitti/data_scene_flow/training/'
     
-    outpath = '/mnt/host/SSD/VIDAR/trash/sr_psmnet_results'
+    outpath = '/mnt/host/SSD/VIDAR/trash/psmnet_kitti_results'
 
     no_cuda = False
 
     cuda = not no_cuda and torch.cuda.is_available()
+
+    normal_mean_var = {'mean': [0.485, 0.456, 0.406],
+                       'std': [0.229, 0.224, 0.225]}
+    infer_transform = transforms.Compose([transforms.ToTensor(),
+                                          transforms.Normalize(**normal_mean_var)])
 
     torch.manual_seed(seed)
     if cuda:
@@ -81,11 +94,7 @@ def main():
         from dataloader import CustomDataSetLoader as ls
 
     all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
-
-    TestImgLoader = torch.utils.data.DataLoader(
-        DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
-        batch_size=1, shuffle=False, num_workers=0, drop_last=False) # num_workers=0 this is very important 
-
+    
     if model_type == 'stackhourglass':
         model = stackhourglass(maxdisp)
     elif model_type == 'basic':
@@ -103,9 +112,6 @@ def main():
 
     print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
-    valid_file = open(os.path.join(datapath, 'valid.txt'), 'r')
-    valid_lines = valid_file.readlines()
-
     ground_truth_dir = outpath + '/ground/'
     predicted_dir = outpath + '/predicted/'
 
@@ -115,27 +121,65 @@ def main():
     if not os.path.exists(predicted_dir):
         os.makedirs(predicted_dir)
 
-    start_full_time = time.time()
-    for idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
-            pred_disp = test(imgL, imgR, model, cuda)
-            pred_disp = (pred_disp * 256).astype('uint16')
-            pred_disp = Image.fromarray(pred_disp)
+    for idx in range(len(test_left_img)): #, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
+        
+            imgL_o = Image.open(test_left_img[idx]).convert('RGB')
+            imgR_o = Image.open(test_right_img[idx]).convert('RGB')
 
-            gt_disp = torch.squeeze(disp_L)
-            gt_disp = gt_disp.data.cpu().numpy()
-            gt_disp = (gt_disp * 256).astype('uint16')
+            disp_L = cv2.imread(test_left_disp[idx], cv2.IMREAD_UNCHANGED)
+
+            w, h = imgL_o.size
+
+            start_time = time.time()
+            
+            imgL = infer_transform(imgL_o)
+            imgR = infer_transform(imgR_o)
+
+            print(imgL.size())
+
+            print('time = %.2f' % (time.time() - start_time))
+
+            # pad to width and hight to 32 times
+            if imgL.shape[1] % 32 != 0:
+                times = imgL.shape[1] // 32
+                top_pad = (times + 1) * 32 - imgL.shape[1]
+            else:
+                top_pad = 0
+
+            if imgL.shape[2] % 32 != 0:
+                times = imgL.shape[2] // 32
+                right_pad = (times + 1) * 32 - imgL.shape[2]
+            else:
+                right_pad = 0
+
+            imgL = F.pad(imgL, (0, right_pad, top_pad, 0)).unsqueeze(0)
+            imgR = F.pad(imgR, (0, right_pad, top_pad, 0)).unsqueeze(0)
+
+            print(imgL.size())
+
+            pred_disp = test(imgL, imgR, model, cuda)
+
+            print(pred_disp.shape)
+
+            img = pred_disp[pred_disp.shape[0] - h:, :-(pred_disp.shape[1] - w)]
+            
+
+
+
+            img = (img * 256).astype('uint16')
+            img = Image.fromarray(img)
+
+            gt_disp = numpy.asarray(disp_L).astype('uint16')
             gt_disp = Image.fromarray(gt_disp)
             
-            img_name = valid_lines[idx].strip()
+            head, tail = os.path.split(test_left_disp[idx])
+
+            img_name = tail
 
             print("procesing: " + os.path.join(predicted_dir, img_name))
 
-            pred_disp.save(os.path.join(predicted_dir, img_name))
+            img.save(os.path.join(predicted_dir, img_name))
             gt_disp.save(os.path.join(ground_truth_dir, img_name))
-
-    valid_file.close()
-
-    print('full generating time = %.2f HR' % ((time.time() - start_full_time) / 3600))
 
 if __name__ == '__main__':
     main()
