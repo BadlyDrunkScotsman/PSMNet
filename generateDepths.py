@@ -12,15 +12,12 @@ import torch.optim as optim
 from subprocess import run
 from torch.autograd import Variable
 
-
-from dataloader import CustomLoader as DA
 from models import *
 
 from clearml import Task, Logger
 
 import torchvision.transforms as transforms
 from PIL import Image
-
 
 import os
 import os.path
