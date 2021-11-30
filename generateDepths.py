@@ -30,9 +30,6 @@ def ugly_hack():
     oh = run(["apt-get", "update"])
     no = run("apt-get install ffmpeg libsm6 libxext6 -y".split(" "))
 
-ugly_hack()
-import cv2
-
 def switch_to_poziomka(task):
     if task.running_locally():
         task._wait_for_repo_detection()
@@ -58,43 +55,18 @@ def test(imgL, imgR, model, cuda):
     return pred_disp
 
 
-def translate(img, x, y, z):
-    # get the width and height of the image
-    height, width = img.shape[:2]
 
-    # get tx and ty values for translation
-    # you can specify any value of your choice
-    tx, ty = 1 - ((width*x)/10), 1 - ((height*y)/10)
-
-    # create the translation matrix using tx and ty, it is a NumPy array
-    translation_matrix = np.array([
-        [1, 0, tx],
-        [0, 1, ty]], dtype=np.float32)
-    
-    return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
-
-# Initiate SIFT detector
-sift = cv2.SIFT_create()
-
-# FLANN parameters
-FLANN_INDEX_KDTREE = 1
-index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
-search_params = dict(checks=100)   # or pass empty dictionary
-
-# Initiate flann
-flann = cv2.FlannBasedMatcher(index_params, search_params)
-
-def feature_extraction(img):
+def feature_extraction(img, sift):
     # find the keypoints and descriptors with SIFT
     return sift.detectAndCompute(img, None)
 
 
-def calcuate_homograpy_matrices(img_path1, img_path2):
+def calcuate_homograpy_matrices(img_path1, img_path2, cv2, flann, sift):
         img1 = cv2.imread(img_path1, cv2.IMREAD_GRAYSCALE)
         img2 = cv2.imread(img_path2, cv2.IMREAD_GRAYSCALE)
 
-        kp1, des1 = feature_extraction(img1)
-        kp2, des2 = feature_extraction(img2)
+        kp1, des1 = feature_extraction(img1, sift)
+        kp2, des2 = feature_extraction(img2, sift)
 
         matches = flann.knnMatch(des1, des2, k=2)
 
@@ -139,7 +111,22 @@ def calcuate_homograpy_matrices(img_path1, img_path2):
 def main():
     task = Task.init("PSMNET", "multi Depth-map generation")
     switch_to_poziomka(task)
-    #ugly_hack()
+
+    ugly_hack()
+    import cv2
+
+
+
+    # Initiate SIFT detector
+    sift = cv2.SIFT_create()
+
+    # FLANN parameters
+    FLANN_INDEX_KDTREE = 1
+    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+    search_params = dict(checks=100)   # or pass empty dictionary
+
+    # Initiate flann
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     maxdisp = 192
     seed = 1
@@ -206,7 +193,7 @@ def main():
 
             h, w = imgL_o.shape[:2]
 
-            H1, H2 = calcuate_homograpy_matrices(test_left_img[idx], test_right_img[idx])
+            H1, H2 = calcuate_homograpy_matrices(test_left_img[idx], test_right_img[idx], cv2, flann, sift)
 
             # Undistort (rectify) the images and save them
             # Adapted from: https://stackoverflow.com/a/62607343
