@@ -105,6 +105,26 @@ def calcuate_homograpy_matrices(img_path1, img_path2, cv2, flann, sift):
 
         return H1 , H2
 
+def disparity_loader(path, fov=60, baseline=0.3, width=1937):
+    normalized_depth = depthmap_loader(path)
+    focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
+    ref_disp = (focal * baseline) / normalized_depth
+    idx = ref_disp < 0.5
+    ref_disp[idx] = 0
+    idx = ref_disp > 191
+    ref_disp[idx] = 191
+    # ref_disp = np.expand_dims(ref_disp, axis=2)
+    return ref_disp.astype('float32')
+
+def depthmap_loader(path):
+    depth = Image.open(path).convert("RGB")
+    array = np.array(depth, dtype=np.float32)
+    normalized_depth = np.dot(array[:, :, :], [1.0, 256.0, 65536.0])
+    normalized_depth = normalized_depth / ((256.0 * 256.0 * 256.0) - 1)
+    normalized_depth = normalized_depth * 1000
+
+    return normalized_depth
+
 def main():
     task = Task.init("PSMNET", "multi Depth-map generation")
     switch_to_poziomka(task)
@@ -186,8 +206,7 @@ def main():
         
             imgL_o = cv2.imread(test_left_img[idx])
             imgR_o = cv2.imread(test_right_img[idx])
-            disp_L = cv2.imread(test_left_disp[idx], cv2.IMREAD_UNCHANGED)
-
+            
             h, w = imgL_o.shape[:2]
 
             H1, H2 = calcuate_homograpy_matrices(test_left_img[idx], test_right_img[idx], cv2, flann, sift)
@@ -233,7 +252,7 @@ def main():
             img = (img * 256).astype('uint16')
             img = Image.fromarray(img)
 
-            gt_disp = numpy.asarray(disp_L).astype('uint16')
+            gt_disp = numpy.asarray(disparity_loader(test_left_disp[idx])).astype('uint16')
             gt_disp = Image.fromarray(gt_disp)
             
             head, tail = os.path.split(test_left_disp[idx])
