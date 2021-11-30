@@ -252,7 +252,7 @@ def main():
             img = (img * 256).astype('uint16')
             img = Image.fromarray(img)
 
-            gt_disp = numpy.asarray(disparity_loader(test_left_disp[idx])).astype('uint16')
+            gt_disp = numpy.asarray(disparity_loader(test_left_disp[idx]) * 256).astype('uint16')
             gt_disp = Image.fromarray(gt_disp)
             
             head, tail = os.path.split(test_left_disp[idx])
