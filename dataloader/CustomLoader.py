@@ -3,6 +3,8 @@ import random
 import numpy as np
 import torch.utils.data as data
 from PIL import Image
+import cv2
+import os
 
 from utils import preprocess
 
@@ -20,6 +22,21 @@ def default_loader(path):
     return Image.open(path).convert('RGB')
 
 
+def translate(img, x, y, z):
+    # get the width and height of the image
+    height, width = img.shape[:2]
+
+    # get tx and ty values for translation
+    # you can specify any value of your choice
+    tx, ty = 1 - ((width*x)/10), 1 - ((height*y)/10)
+
+    # create the translation matrix using tx and ty, it is a NumPy array
+    translation_matrix = np.array([
+        [1, 0, tx],
+        [0, 1, ty]], dtype=np.float32)
+    
+    return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
+
 def disparity_loader(path, fov=60, baseline=0.4, width=1937):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
@@ -28,10 +45,8 @@ def disparity_loader(path, fov=60, baseline=0.4, width=1937):
     ref_disp[idx] = 0
     idx = ref_disp > 191
     ref_disp[idx] = 191
-
     # ref_disp = np.expand_dims(ref_disp, axis=2)
     return ref_disp.astype('float32')
-
 
 def depthmap_loader(path):
     depth = Image.open(path).convert("RGB")
@@ -44,13 +59,14 @@ def depthmap_loader(path):
 
 
 class myImageFloder(data.Dataset):
-    def __init__(self, left, right, left_disparity, randomCrop, loader=default_loader, disploader=disparity_loader):
+    def __init__(self, left, right, left_disparity, randomCrop, trans_data_file_path, loader=default_loader, disploader=disparity_loader):
         self.left = left
         self.right = right
         self.disp_L = left_disparity
         self.loader = loader
         self.disploader = disploader
         self.crop = randomCrop
+        self.trans_data_file_path = trans_data_file_path
 
     def __getitem__(self, index):
         left = self.left[index]
@@ -61,6 +77,30 @@ class myImageFloder(data.Dataset):
         right_img = self.loader(right)
         dataL = self.disploader(disp_L)
 
+        # removing extension
+        file_name = os.path.splitext(os.path.basename(self.trans_data_file_path))[0]
+
+        # Using readlines()
+        file = open(self.trans_data_file_path, 'r')
+        Lines = file.readlines()
+
+        
+        trans_x = 0
+        trans_y = 0
+        trans_z = 0
+        
+        # Strips the newline character
+        for line in Lines:
+            line = line.strip()
+            values = line.split(' ')
+            if(values[0] == file_name):
+                trans_x = values[1]
+                trans_y = values[2]
+                trans_z = values[3]
+
+        file.close()
+
+        right_img = translate(right_img, trans_x, trans_y, trans_z)
 
         processed = preprocess.get_transform(augment=False)
 

@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 import time
 import numpy
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -24,9 +25,13 @@ from PIL import Image
 import os
 import os.path
 
+
 def ugly_hack():
     oh = run(["apt-get", "update"])
     no = run("apt-get install ffmpeg libsm6 libxext6 -y".split(" "))
+
+ugly_hack()
+import cv2
 
 def switch_to_poziomka(task):
     if task.running_locally():
@@ -53,21 +58,97 @@ def test(imgL, imgR, model, cuda):
     return pred_disp
 
 
+def translate(img, x, y, z):
+    # get the width and height of the image
+    height, width = img.shape[:2]
+
+    # get tx and ty values for translation
+    # you can specify any value of your choice
+    tx, ty = 1 - ((width*x)/10), 1 - ((height*y)/10)
+
+    # create the translation matrix using tx and ty, it is a NumPy array
+    translation_matrix = np.array([
+        [1, 0, tx],
+        [0, 1, ty]], dtype=np.float32)
+    
+    return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
+
+# Initiate SIFT detector
+sift = cv2.SIFT_create()
+
+# FLANN parameters
+FLANN_INDEX_KDTREE = 1
+index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+search_params = dict(checks=100)   # or pass empty dictionary
+
+# Initiate flann
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+def feature_extraction(img):
+    # find the keypoints and descriptors with SIFT
+    return sift.detectAndCompute(img, None)
+
+
+def calcuate_homograpy_matrices(img_path1, img_path2):
+        img1 = cv2.imread(img_path1, cv2.IMREAD_GRAYSCALE)
+        img2 = cv2.imread(img_path2, cv2.IMREAD_GRAYSCALE)
+
+        kp1, des1 = feature_extraction(img1)
+        kp2, des2 = feature_extraction(img2)
+
+        matches = flann.knnMatch(des1, des2, k=2)
+
+        # Keep good matches: calculate distinctive image features
+        # Lowe, D.G. Distinctive Image Features from Scale-Invariant Keypoints. International Journal of Computer Vision 60, 91–110 (2004). https://doi.org/10.1023/B:VISI.0000029664.99615.94
+        # https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
+        matchesMask = [[0, 0] for i in range(len(matches))]
+        good = []
+        pts1 = []
+        pts2 = []
+
+        for i, (m, n) in enumerate(matches):
+            if m.distance < 0.7*n.distance:
+                # Keep this keypoint pair
+                matchesMask[i] = [1, 0]
+                good.append(m)
+                pts2.append(kp2[m.trainIdx].pt)
+                pts1.append(kp1[m.queryIdx].pt)
+
+        # ------------------------------------------------------------
+        # STEREO RECTIFICATION
+
+        # Calculate the fundamental matrix for the cameras
+        # https://docs.opencv.org/master/da/de9/tutorial_py_epipolar_geometry.html
+        pts1 = np.int32(pts1)
+        pts2 = np.int32(pts2)
+        fundamental_matrix, inliers = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC)
+
+        # We select only inlier points
+        pts1 = pts1[inliers.ravel() == 1]
+        pts2 = pts2[inliers.ravel() == 1]
+
+        # Stereo rectification (uncalibrated variant)
+        # Adapted from: https://stackoverflow.com/a/62607343
+        h1, w1 = img1.shape
+        _, H1, H2 = cv2.stereoRectifyUncalibrated(
+            np.float32(pts1), np.float32(pts2), fundamental_matrix, imgSize=(w1, h1)
+        )
+
+        return H1 , H2
+
 def main():
     task = Task.init("PSMNET", "multi Depth-map generation")
     switch_to_poziomka(task)
-    ugly_hack()
-
-    import cv2
+    #ugly_hack()
 
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/trash/pretrained_model_KITTI2015.tar'
+    model_path = '/mnt/host/SSD/VIDAR/trash/fov60_bs30_29.tar'
     model_type = 'stackhourglass'
-    datatype = '2015'
-    datapath = '/mnt/host/SSD/VIDAR/dane/kitti/data_scene_flow/training/'
+    datatype = 'custom'
+    datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1211_x/'
     
-    outpath = '/mnt/host/SSD/VIDAR/trash/psmnet_kitti_results'
+    outpath = '/mnt/host/SSD/VIDAR/trash/20210901-1211_x/'
 
     no_cuda = False
 
@@ -87,7 +168,7 @@ def main():
     elif datatype == '2012':
         from dataloader import KITTIloader2012 as ls
     elif datatype == 'custom':
-        from dataloader import CustomDataSetLoader as ls
+        from dataloader import FullDataSetLoader as ls
 
     all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
     
@@ -119,17 +200,23 @@ def main():
 
     for idx in range(len(test_left_img)): #, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
         
-            imgL_o = Image.open(test_left_img[idx]).convert('RGB')
-            imgR_o = Image.open(test_right_img[idx]).convert('RGB')
-
+            imgL_o = cv2.imread(test_left_img[idx])
+            imgR_o = cv2.imread(test_right_img[idx])
             disp_L = cv2.imread(test_left_disp[idx], cv2.IMREAD_UNCHANGED)
 
-            w, h = imgL_o.size
+            h, w = imgL_o.shape[:2]
+
+            H1, H2 = calcuate_homograpy_matrices(test_left_img[idx], test_right_img[idx])
+
+            # Undistort (rectify) the images and save them
+            # Adapted from: https://stackoverflow.com/a/62607343
+            img1_rectified = cv2.warpPerspective(imgL_o, H1, (w, h))
+            img2_rectified = cv2.warpPerspective(imgR_o, H2, (w, h))
 
             start_time = time.time()
             
-            imgL = infer_transform(imgL_o)
-            imgR = infer_transform(imgR_o)
+            imgL = infer_transform(img1_rectified)
+            imgR = infer_transform(img2_rectified)
 
             print(imgL.size())
 
@@ -159,9 +246,6 @@ def main():
 
             img = pred_disp[pred_disp.shape[0] - h:, :-(pred_disp.shape[1] - w)]
             
-
-
-
             img = (img * 256).astype('uint16')
             img = Image.fromarray(img)
 
