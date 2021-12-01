@@ -178,9 +178,9 @@ def main():
                 line = line.strip()
                 values = line.split(' ')
                 if(values[0] == file_name):
-                    trans_x = values[1]
-                    trans_y = values[2]
-                    trans_z = values[3]
+                    trans_x = float(values[1])
+                    trans_y = float(values[2])
+                    trans_z = float(values[3])
 
             imgR_o = translate(imgR_o, trans_x, trans_y, cv2)
 
