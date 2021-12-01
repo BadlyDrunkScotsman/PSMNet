@@ -98,7 +98,7 @@ def main():
 
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/trash/fov60_bs30_29.tar'
+    model_path = '/mnt/host/SSD/VIDAR/trash/right_center_aug_v2_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
     datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1211_x/'
