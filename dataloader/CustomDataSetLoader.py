@@ -26,7 +26,7 @@ def dataloader(filepath):
     dir = filepath
     dir_disp = filepath + '/cam_dep_60/'
 
-    subdir = ['/cam_60/', '/cam_60_15bs/']
+    subdir = ['/cam_60/', '/cam_60_15bs_ch/']
 
     train_file = open(os.path.join(dir, 'train.txt'), 'r')
     valid_file = open(os.path.join(dir, 'valid.txt'), 'r')
