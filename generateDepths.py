@@ -98,7 +98,7 @@ def main():
 
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/trash/right_center_aug_v2_29.tar'
+    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
     datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1211_x/'
@@ -182,7 +182,7 @@ def main():
                     trans_y = float(values[2])
                     trans_z = float(values[3])
 
-            imgR_o = translate(imgR_o, trans_x, trans_y, cv2)
+            #imgR_o = translate(imgR_o, trans_x, trans_y, cv2)
 
             start_time = time.time()
             
