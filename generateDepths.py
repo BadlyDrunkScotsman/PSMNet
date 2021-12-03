@@ -51,18 +51,18 @@ def test(imgL, imgR, model, cuda):
 
     return pred_disp
 
-def translate(img, x, y, cv2):
+def translate(img, x, y, z, cv2):
     # get the width and height of the image
     height, width = img.shape[:2]
 
     # get tx and ty values for translation
     # you can specify any value of your choice
-    tx, ty = 1 - ((width*x)/10), 1 - ((height*y)/10)
+    tx, ty, tz = 1 - ((width*x)/10), 1 - ((height*y)/10), 1 + (z)
 
     # create the translation matrix using tx and ty, it is a NumPy array
     translation_matrix = np.array([
-        [1, 0, tx],
-        [0, 1, ty]], dtype=np.float32)
+        [tz, 0, tx],
+        [0, tz, ty]], dtype=np.float32)
     
     return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
 
@@ -178,11 +178,11 @@ def main():
                 line = line.strip()
                 values = line.split(' ')
                 if(values[0] == file_name):
-                    trans_x = float(values[1])
+                    trans_x = float(values[3])
                     trans_y = float(values[2])
-                    trans_z = float(values[3])
+                    trans_z = float(values[1])
 
-            imgR_o = translate(imgR_o, trans_x, trans_y, cv2)
+            imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
 
             start_time = time.time()
             
