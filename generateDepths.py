@@ -57,7 +57,7 @@ def translate(img, x, y, z, cv2):
 
     # get tx and ty values for translation
     # you can specify any value of your choice
-    tx, ty, tz = 1 - ((width*x)/10), 1 - ((height*y)/10), 1 + (z)
+    tx, ty, tz = 1 - ((width*x)/10), 1 - ((height*y)/10), 1 - (z)
 
     # create the translation matrix using tx and ty, it is a NumPy array
     translation_matrix = np.array([
