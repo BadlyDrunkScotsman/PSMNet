@@ -51,19 +51,19 @@ def test(imgL, imgR, model, cuda):
 
     return pred_disp
 
-def translate(img, x, y, z, cv2):
+def translate(img, x = 0, y = 0, z = 0, cv2 = None):
     # get the width and height of the image
     height, width = img.shape[:2]
 
     # get tx and ty values for translation
     # you can specify any value of your choice
-    tx, ty, tz = 1 - ((width*x)/10), 1 - ((height*y)/10), 1 - (z)
+    ty, tx, tz = (width+(x*width*50))/width, (height+(y*height*50))/height, 1 - (z/10)
 
     # create the translation matrix using tx and ty, it is a NumPy array
     translation_matrix = np.array([
         [tz, 0, tx],
         [0, tz, ty]], dtype=np.float32)
-    
+
     return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
 
 
@@ -101,9 +101,9 @@ def main():
     model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
-    datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1211_x/'
+    datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1216_y/'
     
-    outpath = '/mnt/host/SSD/VIDAR/trash/20210901-1211_x/'
+    outpath = '/mnt/host/SSD/VIDAR/trash/20210901-1216_y/'
 
     no_cuda = False
 
