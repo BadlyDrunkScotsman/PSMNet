@@ -67,7 +67,7 @@ def translate(img, x = 0, y = 0, z = 0, cv2 = None):
     return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
 
 
-def disparity_loader(path, fov=60, baseline=0.3, width=1937):
+def disparity_loader(path, fov=60, baseline=0.15, width=1937):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
     ref_disp = (focal * baseline) / normalized_depth
@@ -182,7 +182,7 @@ def main():
                     trans_y = float(values[2])
                     trans_z = float(values[1])
 
-            imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
+            #imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
 
             start_time = time.time()
             
