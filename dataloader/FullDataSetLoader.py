@@ -17,7 +17,7 @@ def is_image_file(filename):
 def dataloader(filepath):
     dir_disp = filepath + '/cam_dep_60_left/'
 
-    subdir = ['/cam_60_left/', '/cam_60_right_ch/']
+    subdir = ['/cam_60_left/', '/cam_60_right/']
 
     
     image = [img for img in os.listdir(filepath+subdir[0])]
