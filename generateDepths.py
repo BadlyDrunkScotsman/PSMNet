@@ -232,7 +232,7 @@ def main():
             
             h, w = imgL_o.shape[:2]
 
-            H1, H2 = calcuate_homograpy_matrices(imgL_o, imgR_o, sift, flann, cv2)
+            H1, H2 = calcuate_homograpy_matrices(test_left_img[idx], test_right_img[idx], sift, flann, cv2)
 
             head, tail = os.path.split(test_left_img[idx])
             np.savetxt(warp_dir+tail+'.csv', H1, delimiter=',')
