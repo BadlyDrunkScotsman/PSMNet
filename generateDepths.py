@@ -35,6 +35,63 @@ def switch_to_poziomka(task):
         task.update_task(config)
         task.execute_remotely(queue_name="default")
 
+# FLANN parameters
+FLANN_INDEX_KDTREE = 1
+index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+search_params = dict(checks=50)   # or pass empty dictionary
+
+def feature_extraction(img, sift):
+    # find the keypoints and descriptors with SIFT
+    return sift.detectAndCompute(img, None)
+
+def calcuate_homograpy_matrices(img_path1, img_path2, sift, flann, cv2):
+        img1 = cv2.imread(img_path1, cv2.IMREAD_GRAYSCALE)
+        img2 = cv2.imread(img_path2, cv2.IMREAD_GRAYSCALE)
+
+        kp1, des1 = feature_extraction(img1, sift)
+        kp2, des2 = feature_extraction(img2, sift)
+
+        matches = flann.knnMatch(des1, des2, k=2)
+
+        # Keep good matches: calculate distinctive image features
+        # Lowe, D.G. Distinctive Image Features from Scale-Invariant Keypoints. International Journal of Computer Vision 60, 91–110 (2004). https://doi.org/10.1023/B:VISI.0000029664.99615.94
+        # https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
+        matchesMask = [[0, 0] for i in range(len(matches))]
+        good = []
+        pts1 = []
+        pts2 = []
+
+        for i, (m, n) in enumerate(matches):
+            if m.distance < 0.7*n.distance:
+                # Keep this keypoint pair
+                matchesMask[i] = [1, 0]
+                good.append(m)
+                pts2.append(kp2[m.trainIdx].pt)
+                pts1.append(kp1[m.queryIdx].pt)
+
+        # ------------------------------------------------------------
+        # STEREO RECTIFICATION
+
+        # Calculate the fundamental matrix for the cameras
+        # https://docs.opencv.org/master/da/de9/tutorial_py_epipolar_geometry.html
+        pts1 = np.int32(pts1)
+        pts2 = np.int32(pts2)
+        fundamental_matrix, inliers = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC)
+
+        # We select only inlier points
+        pts1 = pts1[inliers.ravel() == 1]
+        pts2 = pts2[inliers.ravel() == 1]
+
+        # Stereo rectification (uncalibrated variant)
+        # Adapted from: https://stackoverflow.com/a/62607343
+        h1, w1 = img1.shape
+        h2, w2 = img2.shape
+        _, H1, H2 = cv2.stereoRectifyUncalibrated(
+            np.float32(pts1), np.float32(pts2), fundamental_matrix, imgSize=(w1, h1)
+        )
+
+        return H1, H2
+
 
 def test(imgL, imgR, model, cuda):
     model.eval()
@@ -94,7 +151,12 @@ def main():
     ugly_hack()
     import cv2
 
+    # Initiate SIFT detector
+    sift = cv2.SIFT_create()
 
+        
+    # Initiate flann
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     maxdisp = 192
     seed = 1
@@ -152,12 +214,16 @@ def main():
 
     ground_truth_dir = outpath + '/ground/'
     predicted_dir = outpath + '/predicted/'
+    warp_dir = outpath + '/left_warp/'
 
     if not os.path.exists(ground_truth_dir):
         os.makedirs(ground_truth_dir)
 
     if not os.path.exists(predicted_dir):
         os.makedirs(predicted_dir)
+
+    if not os.path.exists(warp_dir):
+        os.makedirs(warp_dir)
 
     for idx in range(len(test_left_img)): #, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
         
@@ -166,23 +232,14 @@ def main():
             
             h, w = imgL_o.shape[:2]
 
-            # removing extension
-            file_name = os.path.splitext(os.path.basename(test_left_img[idx]))[0]
+            H1, H2 = calcuate_homograpy_matrices(imgL_o, imgR_o, sift, flann, cv2)
 
-            trans_x = 0
-            trans_y = 0
-            trans_z = 0
-            
-            # Strips the newline character
-            for line in Lines:
-                line = line.strip()
-                values = line.split(' ')
-                if(values[0] == file_name):
-                    trans_x = float(values[3])
-                    trans_y = float(values[2])
-                    trans_z = float(values[1])
+            head, tail = os.path.split(test_left_img[idx])
+            np.savetxt(warp_dir+tail+'.csv', H1, delimiter=',')
 
             #imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
+            imgL_o = cv2.warpPerspective(imgL_o, H1, (w, h))
+            imgR_o = cv2.warpPerspective(imgR_o, H2, (w, h))
 
             start_time = time.time()
             
