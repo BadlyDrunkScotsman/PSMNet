@@ -182,7 +182,7 @@ def main():
                     trans_y = float(values[2])
                     trans_z = float(values[1])
 
-            imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
+            #imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
 
             start_time = time.time()
             
