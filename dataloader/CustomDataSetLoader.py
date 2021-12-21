@@ -34,9 +34,6 @@ def dataloader(filepath):
     train_lines = train_file.readlines()
     valid_lines = valid_file.readlines()
 
-    train_file.close()
-    valid_file.close()
-
     for line in train_lines:
         line = line.strip()
 
