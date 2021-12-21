@@ -21,22 +21,6 @@ def is_image_file(filename):
 def default_loader(path):
     return Image.open(path).convert('RGB')
 
-
-def translate(img, x, y, z):
-    # get the width and height of the image
-    height, width = img.shape[:2]
-
-    # get tx and ty values for translation
-    # you can specify any value of your choice
-    tx, ty = 1 - ((width*x)/10), 1 - ((height*y)/10)
-
-    # create the translation matrix using tx and ty, it is a NumPy array
-    translation_matrix = np.array([
-        [1, 0, tx],
-        [0, 1, ty]], dtype=np.float32)
-    
-    return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
-
 def disparity_loader(path, fov=60, baseline=0.3, width=1937):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
@@ -76,31 +60,6 @@ class myImageFloder(data.Dataset):
         left_img = self.loader(left)
         right_img = self.loader(right)
         dataL = self.disploader(disp_L)
-
-        # removing extension
-        #file_name = os.path.splitext(os.path.basename(self.trans_data_file_path))[0]
-
-        # Using readlines()
-        #file = open(self.trans_data_file_path, 'r')
-        #Lines = file.readlines()
-
-        
-        trans_x = 0
-        trans_y = 0
-        trans_z = 0
-        
-        # Strips the newline character
-        #for line in Lines:
-        #    line = line.strip()
-        #    values = line.split(' ')
-        #    if(values[0] == file_name):
-        #        trans_x = values[1]
-        #        trans_y = values[2]
-        #        trans_z = values[3]
-
-        #file.close()
-
-        #right_img = translate(right_img, trans_x, trans_y, trans_z)
 
         processed = preprocess.get_transform(augment=False)
 
