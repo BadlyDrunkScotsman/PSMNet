@@ -59,14 +59,14 @@ def depthmap_loader(path):
 
 
 class myImageFloder(data.Dataset):
-    def __init__(self, left, right, left_disparity, randomCrop, trans_data_file_path, loader=default_loader, disploader=disparity_loader):
+    def __init__(self, left, right, left_disparity, randomCrop, loader=default_loader, disploader=disparity_loader):
         self.left = left
         self.right = right
         self.disp_L = left_disparity
         self.loader = loader
         self.disploader = disploader
         self.crop = randomCrop
-        self.trans_data_file_path = trans_data_file_path
+        #self.trans_data_file_path = trans_data_file_path
 
     def __getitem__(self, index):
         left = self.left[index]
