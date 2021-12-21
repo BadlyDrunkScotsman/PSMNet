@@ -30,7 +30,7 @@ def switch_to_poziomka(task):
         task.update_task(config)
         task.execute_remotely(queue_name="default")
 
-def train(imgL, imgR, disp_L, model, optimizer, cuda, maxdisp):
+def train(imgL, imgR, disp_L, model, optimizer, model_type, cuda, maxdisp):
         model.train()
 
         if cuda:
@@ -42,13 +42,13 @@ def train(imgL, imgR, disp_L, model, optimizer, cuda, maxdisp):
         #----
         optimizer.zero_grad()
         
-        if model == 'stackhourglass':
+        if model_type == 'stackhourglass':
             output1, output2, output3 = model(imgL,imgR)
             output1 = torch.squeeze(output1,1)
             output2 = torch.squeeze(output2,1)
             output3 = torch.squeeze(output3,1)
             loss = 0.5*F.smooth_l1_loss(output1[mask], disp_true[mask], size_average=True) + 0.7*F.smooth_l1_loss(output2[mask], disp_true[mask], size_average=True) + F.smooth_l1_loss(output3[mask], disp_true[mask], size_average=True) 
-        elif model == 'basic':
+        elif model_type == 'basic':
             output = model(imgL,imgR)
             output = torch.squeeze(output,1)
             loss = F.smooth_l1_loss(output[mask], disp_true[mask], size_average=True)
@@ -181,7 +181,7 @@ def main():
         for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
             start_time = time.time()
 
-            loss = train(imgL_crop,imgR_crop, disp_crop_L, model, optimizer, cuda, maxdisp)
+            loss = train(imgL_crop,imgR_crop, disp_crop_L, model, optimizer, model_type, cuda, maxdisp)
             
             print('Iter %d training loss = %.3f , time = %.2f' %(batch_idx, loss, time.time() - start_time))
             Logger.current_logger().report_scalar(
