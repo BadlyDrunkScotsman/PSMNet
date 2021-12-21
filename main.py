@@ -8,7 +8,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
 import time
-from dataloader import SecenFlowLoader as DA
+from dataloader import CustomLoader as DA
 from models import *
 
 
