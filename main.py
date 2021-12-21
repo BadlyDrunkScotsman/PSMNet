@@ -8,7 +8,6 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
 import time
-from dataloader import CustomLoader as DA
 from models import *
 
 
@@ -140,6 +139,8 @@ def main():
         from dataloader import CustomDataSetLoader as ls
 
     all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
+
+    from dataloader import CustomLoader as DA
 
     TrainImgLoader = torch.utils.data.DataLoader(
             DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 

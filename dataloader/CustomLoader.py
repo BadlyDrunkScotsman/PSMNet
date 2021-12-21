@@ -37,7 +37,7 @@ def translate(img, x, y, z):
     
     return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
 
-def disparity_loader(path, fov=60, baseline=0.4, width=1937):
+def disparity_loader(path, fov=60, baseline=0.3, width=1937):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
     ref_disp = (focal * baseline) / normalized_depth
@@ -78,11 +78,11 @@ class myImageFloder(data.Dataset):
         dataL = self.disploader(disp_L)
 
         # removing extension
-        file_name = os.path.splitext(os.path.basename(self.trans_data_file_path))[0]
+        #file_name = os.path.splitext(os.path.basename(self.trans_data_file_path))[0]
 
         # Using readlines()
-        file = open(self.trans_data_file_path, 'r')
-        Lines = file.readlines()
+        #file = open(self.trans_data_file_path, 'r')
+        #Lines = file.readlines()
 
         
         trans_x = 0
@@ -90,17 +90,17 @@ class myImageFloder(data.Dataset):
         trans_z = 0
         
         # Strips the newline character
-        for line in Lines:
-            line = line.strip()
-            values = line.split(' ')
-            if(values[0] == file_name):
-                trans_x = values[1]
-                trans_y = values[2]
-                trans_z = values[3]
+        #for line in Lines:
+        #    line = line.strip()
+        #    values = line.split(' ')
+        #    if(values[0] == file_name):
+        #        trans_x = values[1]
+        #        trans_y = values[2]
+        #        trans_z = values[3]
 
-        file.close()
+        #file.close()
 
-        right_img = translate(right_img, trans_x, trans_y, trans_z)
+        #right_img = translate(right_img, trans_x, trans_y, trans_z)
 
         processed = preprocess.get_transform(augment=False)
 
