@@ -144,7 +144,7 @@ def main():
 
     TrainImgLoader = torch.utils.data.DataLoader(
             DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 
-            batch_size= 12, shuffle= True, num_workers= 4, drop_last=False)
+            batch_size= 8, shuffle= True, num_workers= 4, drop_last=False)
 
     TestImgLoader = torch.utils.data.DataLoader(
             DA.myImageFloder(test_left_img,test_right_img,test_left_disp, False), 
@@ -182,9 +182,14 @@ def main():
             start_time = time.time()
 
             loss = train(imgL_crop,imgR_crop, disp_crop_L, model, optimizer, cuda, maxdisp)
+            
             print('Iter %d training loss = %.3f , time = %.2f' %(batch_idx, loss, time.time() - start_time))
+            Logger.current_logger().report_scalar(
+                "Training", "loss", iteration=((epoch * len(TrainImgLoader)) + batch_idx), value=loss)
             total_train_loss += loss
         print('epoch %d total training loss = %.3f' %(epoch, total_train_loss/len(TrainImgLoader)))
+        Logger.current_logger().report_scalar(
+                "Epoch_loss", "loss", iteration=epoch, value=(total_train_loss / len(TrainImgLoader)))
 
         #SAVE
         savefilename = savemodel+'/checkpoint_'+str(epoch)+'.tar'
