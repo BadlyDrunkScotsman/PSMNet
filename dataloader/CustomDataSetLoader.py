@@ -24,15 +24,18 @@ def dataloader(filepath):
     eval_left_disp = []
 
     dir = filepath
-    dir_disp = filepath + '/cam_dep_60/'
+    dir_disp = filepath + '/cam_dep_60_Bl0/'
 
-    subdir = ['/cam_60/', '/cam_60_15bs_ch/']
+    subdir = ['/cam_60_BL0/', '/cam_60_BL30/']
 
     train_file = open(os.path.join(dir, 'train.txt'), 'r')
     valid_file = open(os.path.join(dir, 'valid.txt'), 'r')
 
     train_lines = train_file.readlines()
     valid_lines = valid_file.readlines()
+
+    train_file.close()
+    valid_file.close()
 
     for line in train_lines:
         line = line.strip()
