@@ -157,7 +157,7 @@ def test(imgL, imgR, disp_true):
     print(output3.shape)
 
     if top_pad != 0:
-        img = output3[:, top_pad:, :]
+        img = output3[top_pad:, :]
     else:
         img = output3
 
