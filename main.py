@@ -156,8 +156,7 @@ def test(imgL, imgR, disp_true):
     else:
         img = output3
 
-    output3 = torch.squeeze(output3)
-
+    #output3 = torch.squeeze(output3)
     if len(disp_true[mask]) == 0:
         loss = 0
     else:
