@@ -99,7 +99,9 @@ class myImageFloder(data.Dataset):
         right_img = self.loader(right)
         dataL = self.disploader(disp_L)
 
-        frame_num = int(self.left[index].split(".png")[0])
+        head, tail = os.path.split(self.left[index])
+
+        frame_num = int(tail.split(".png")[0])
 
         transform = None
 
