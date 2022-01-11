@@ -183,7 +183,7 @@ for epoch in range(0, epochs):
     for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
         start_time = time.time()
 
-        loss = train(imgL_crop, imgR_crop, disp_crop_L, model, cuda, model_type, optimizer)
+        loss = train(imgL_crop, imgR_crop, disp_crop_L)
         print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
         total_train_loss += loss
 
@@ -196,7 +196,7 @@ for epoch in range(0, epochs):
 
     total_test_loss = 0
     for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
-        test_loss = test(imgL, imgR, disp_L, model, cuda)
+        test_loss = test(imgL, imgR, disp_L)
         print('Iter %d test loss = %.3f' % (batch_idx, test_loss))
         total_test_loss += test_loss
     print('total test loss = %.3f' % (total_test_loss / len(TestImgLoader)))
