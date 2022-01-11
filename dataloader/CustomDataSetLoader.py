@@ -29,7 +29,7 @@ def dataloader(filepath):
     dir = filepath
     dir_disp = filepath + '/cam_dep_60_Bl0/'
 
-    subdir = ['/cam_60_BL0/', '/cam_60_BL30/', '/cam_60_BL30_ch_x/', '/cam_60_BL30_ch_y/', '/cam_60_BL30_ch_z/', '/cam_60_BL30_ch_roll/']
+    subdir = ['/cam_60_BL0/', '/cam_60_BL30_ch_x/', '/cam_60_BL30_ch_y/', '/cam_60_BL30_ch_z/', '/cam_60_BL30_ch_roll/']
     
     right_transforms = []
 
@@ -95,10 +95,6 @@ def dataloader(filepath):
         all_left_disp.append(dir_disp + line)
         all_right_img.append(dir + subdir[4] + line)
 
-        all_left_img.append(dir + subdir[0] + line)
-        all_left_disp.append(dir_disp + line)
-        all_right_img.append(dir + subdir[5] + line)
-
 
     for line in valid_lines:
         line = line.strip()
@@ -118,9 +114,5 @@ def dataloader(filepath):
         eval_left_img.append(dir + subdir[0] + line)
         eval_left_disp.append(dir_disp + line)
         eval_right_img.append(dir + subdir[4] + line)
-
-        eval_left_img.append(dir + subdir[0] + line)
-        eval_left_disp.append(dir_disp + line)
-        eval_right_img.append(dir + subdir[5] + line)
 
     return all_left_img, all_right_img, all_left_disp, eval_left_img, eval_right_img, eval_left_disp, right_transforms
