@@ -109,7 +109,7 @@ class myImageFloder(data.Dataset):
             if(transl.frame_num == frame_num):
                 transform = transl
 
-        print(transform.x)
+        #print(transform.x)
 
         if ("_ch_x" in right):
             T = translation_matrix(transform.x, 0)
