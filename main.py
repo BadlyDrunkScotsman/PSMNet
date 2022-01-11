@@ -10,7 +10,6 @@ import torch.optim as optim
 from subprocess import run
 from torch.autograd import Variable
 
-from dataloader import CustomLoader as DA
 from models import *
 
 from clearml import Task, Logger
@@ -59,6 +58,7 @@ elif datatype == 'custom':
 
 all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
 
+from dataloader import CustomLoader as DA
 
 TrainImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
