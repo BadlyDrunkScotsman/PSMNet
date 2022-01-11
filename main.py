@@ -130,6 +130,7 @@ def test(imgL, imgR, disp_true):
     if cuda:
         imgL, imgR, disp_true = imgL.cuda(), imgR.cuda(), disp_true.cuda()
     # ---------
+    disp_true = torch.squeeze(disp_true)
     mask = disp_true < 192
     # ----
 
@@ -150,8 +151,8 @@ def test(imgL, imgR, disp_true):
 
     with torch.no_grad():
         output3 = model(imgL, imgR)
-        #output3 = torch.squeeze(output3)
-        output3 = torch.unsqueeze(output3, 0)
+        output3 = torch.squeeze(output3)
+        #output3 = torch.unsqueeze(output3, 0)
 
     print(output3.shape)
 
@@ -161,11 +162,7 @@ def test(imgL, imgR, disp_true):
         img = output3
 
     
-    if len(disp_true[mask]) == 0:
-        loss = 0
-    else:
-        loss = F.l1_loss(img[mask],
-                         disp_true[mask])  # torch.mean(torch.abs(img[mask]-disp_true[mask]))  # end-point-error
+    loss = F.l1_loss(img[mask], disp_true[mask])  # torch.mean(torch.abs(img[mask]-disp_true[mask]))  # end-point-error
 
     return loss.data.cpu()
 
