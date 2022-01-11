@@ -125,7 +125,10 @@ class myImageFloder(data.Dataset):
             
         matrix = np.float32(T.flatten()[:6].reshape(2,3))
         width, height = right_img.size
-        right_img = cv2.warpAffine(src=np.array(right_img), M=matrix, dsize=(width, height))
+
+        right_img = np.array(right_img)
+        right_img = cv2.warpAffine(src=right_img, M=matrix, dsize=(width, height))
+        right_img = Image.fromarray(right_img)
 
         processed = preprocess.get_transform(augment=False)
 
