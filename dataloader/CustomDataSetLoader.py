@@ -59,7 +59,7 @@ def dataloader(filepath):
         if "Roll:" in line:
             roll = float(line.split("Roll: ")[1])
             frame_num = int(line.split(" ")[1]) + 21
-            right_transforms.insert(TranslactionEntry(frame_num, x, y, z, pitch, yaw, roll))
+            right_transforms.append(TranslactionEntry(frame_num, x, y, z, pitch, yaw, roll))
         
     all_left_img = []
     all_right_img = []
