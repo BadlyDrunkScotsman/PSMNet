@@ -184,12 +184,12 @@ for epoch in range(0, epochs):
     for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
         start_time = time.time()
 
-        #loss = train(imgL_crop, imgR_crop, disp_crop_L)
-        #print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
-        #total_train_loss += loss
+        loss = train(imgL_crop, imgR_crop, disp_crop_L)
+        print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
+        total_train_loss += loss
 
-        #Logger.current_logger().report_scalar(
-        #    "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
+        Logger.current_logger().report_scalar(
+            "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
         
     print('epoch %d total training loss = %.3f' % (epoch, total_train_loss / len(TrainImgLoader)))
     Logger.current_logger().report_scalar(
