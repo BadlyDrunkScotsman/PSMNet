@@ -39,8 +39,8 @@ seed = 1
 loadmodel = None
 model_type = 'stackhourglass'
 datatype = 'custom'
-datapath = '/mnt/host/SSD/VIDAR/dane/croped_ds_15b_fov60'
-savemodel = '/mnt/host/SSD/VIDAR/trash/sr_psmnet_results/'
+datapath = '/mnt/SSD/VIDAR/dane/20220107-2226_3_60FOV_BL30_NOWY/'
+savemodel = '/mnt/host/SSD/VIDAR/trash/psmnet_aug_translaction/'
 no_cuda = False
 epochs = 30
 
