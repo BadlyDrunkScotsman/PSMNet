@@ -56,16 +56,16 @@ elif datatype == '2012':
 elif datatype == 'custom':
     from dataloader import CustomDataSetLoader as ls
 
-all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
+all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp, right_transforms = ls.dataloader(datapath)
 
 from dataloader import CustomLoader as DA
 
 TrainImgLoader = torch.utils.data.DataLoader(
-    DA.myImageFloder(all_left_img, all_right_img, all_left_disp, True),
+    DA.myImageFloder(all_left_img, all_right_img, all_left_disp, right_transforms, True),
     batch_size=8, shuffle=True, num_workers=0, drop_last=False) # num_workers=0 this is very important 
 
 TestImgLoader = torch.utils.data.DataLoader(
-    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, False),
+    DA.myImageFloder(test_left_img, test_right_img, test_left_disp, right_transforms, False),
     batch_size=1, shuffle=False, num_workers=0, drop_last=False)
 
 if model_type == 'stackhourglass':
