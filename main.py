@@ -150,12 +150,13 @@ def test(imgL, imgR, disp_true):
 
     with torch.no_grad():
         output3 = model(imgL, imgR)
-        output3 = torch.squeeze(output3)
 
     if top_pad != 0:
         img = output3[:, top_pad:, :]
     else:
         img = output3
+
+    output3 = torch.squeeze(output3)
 
     if len(disp_true[mask]) == 0:
         loss = 0
@@ -183,12 +184,12 @@ for epoch in range(0, epochs):
     for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
         start_time = time.time()
 
-        loss = train(imgL_crop, imgR_crop, disp_crop_L)
-        print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
-        total_train_loss += loss
+        #loss = train(imgL_crop, imgR_crop, disp_crop_L)
+        #print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
+        #total_train_loss += loss
 
-        Logger.current_logger().report_scalar(
-            "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
+        #Logger.current_logger().report_scalar(
+        #    "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
         
     print('epoch %d total training loss = %.3f' % (epoch, total_train_loss / len(TrainImgLoader)))
     Logger.current_logger().report_scalar(
