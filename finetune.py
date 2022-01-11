@@ -50,8 +50,8 @@ seed = 1
 loadmodel = None
 model_type = 'stackhourglass'
 datatype = 'custom'
-datapath = '/mnt/host/SSD/VIDAR/dane/hello_kitti_2015/data_scene_flow/training/'
-savemodel = '/mnt/host/SSD/VIDAR/trash/sr_psmnet_results_x4_kitty/'
+datapath = '/mnt/SSD/VIDAR/dane/20220107-2226_3_60FOV_BL30_NOWY/'
+savemodel = '/mnt/host/SSD/VIDAR/trash/psmnet_aug_translaction/'
 no_cuda = False
 epochs = 30
 
