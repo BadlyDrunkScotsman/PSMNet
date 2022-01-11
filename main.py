@@ -62,7 +62,7 @@ from dataloader import CustomLoader as DA
 
 TrainImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(all_left_img, all_right_img, all_left_disp, right_transforms, True),
-    batch_size=8, shuffle=True, num_workers=0, drop_last=False) # num_workers=0 this is very important 
+    batch_size=6, shuffle=True, num_workers=0, drop_last=False) # num_workers=0 this is very important 
 
 TestImgLoader = torch.utils.data.DataLoader(
     DA.myImageFloder(test_left_img, test_right_img, test_left_disp, right_transforms, False),
