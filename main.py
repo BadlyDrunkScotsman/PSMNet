@@ -150,14 +150,14 @@ def test(imgL, imgR, disp_true):
 
     with torch.no_grad():
         output3 = model(imgL, imgR)
+        output3 = torch.squeeze(output3, 0)
 
-    print(output3.shape)
+    #print(output3.shape)
 
     if top_pad != 0:
         img = output3[:, top_pad:, :]
     else:
         img = output3
-
 
     im_m = img[mask]
     d_t = disp_true[mask]
