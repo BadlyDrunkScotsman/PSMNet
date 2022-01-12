@@ -181,20 +181,20 @@ for epoch in range(0, epochs):
     adjust_learning_rate(optimizer, epoch)
 
     ## training ##
-    #for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
+    for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
 
-    #    start_time = time.time()
+        start_time = time.time()
 
-    #    loss = train(imgL_crop, imgR_crop, disp_crop_L)
-    #    print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
-    #    total_train_loss += loss
+        loss = train(imgL_crop, imgR_crop, disp_crop_L)
+        print('Iter %d training loss = %.3f , time = %.2f' % (batch_idx, loss, time.time() - start_time))
+        total_train_loss += loss
 
-    #    Logger.current_logger().report_scalar(
-    #        "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
+        Logger.current_logger().report_scalar(
+            "Training", "loss", iteration=(epoch * len(TrainImgLoader) + batch_idx), value=loss)
         
-    #print('epoch %d total training loss = %.3f' % (epoch, total_train_loss / len(TrainImgLoader)))
-    #Logger.current_logger().report_scalar(
-    #        "Epoch_loss", "loss", iteration=epoch, value=(total_train_loss / len(TrainImgLoader)))
+    print('epoch %d total training loss = %.3f' % (epoch, total_train_loss / len(TrainImgLoader)))
+    Logger.current_logger().report_scalar(
+            "Epoch_loss", "loss", iteration=epoch, value=(total_train_loss / len(TrainImgLoader)))
 
     total_test_loss = 0
     for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
