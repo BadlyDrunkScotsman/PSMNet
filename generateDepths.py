@@ -148,13 +148,13 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
     gt_disp = np.squeeze(gt_disp, axis=0)
     gt_disp = Image.fromarray(gt_disp)
 
-    print(r_path)
+    print(r_path[0])
 
-    head, tail = os.path.split(r_path)
+    head, tail = os.path.split(r_path[0])
     img_name = tail
 
     dirname = os.path.basename(
-        os.path.dirname(r_path))
+        os.path.dirname(r_path[0]))
 
     
     curr_outpath = outpath + dirname + "/"
