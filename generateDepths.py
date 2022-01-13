@@ -148,6 +148,8 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
     gt_disp = np.squeeze(gt_disp, axis=0)
     gt_disp = Image.fromarray(gt_disp)
 
+    print(r_path)
+
     head, tail = os.path.split(r_path)
     img_name = tail
 
