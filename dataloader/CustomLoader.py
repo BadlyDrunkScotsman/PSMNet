@@ -95,6 +95,8 @@ class myImageFloder(data.Dataset):
         right = self.right[index]
         disp_L = self.disp_L[index]
 
+        print(right)
+
         left_img = self.loader(left)
         right_img = self.loader(right)
         dataL = self.disploader(disp_L)
@@ -127,7 +129,7 @@ class myImageFloder(data.Dataset):
         width, height = right_img.size
 
         right_img = np.array(right_img)
-        #right_img = cv2.warpAffine(src=right_img, M=matrix, dsize=(width, height))
+        right_img = cv2.warpAffine(src=right_img, M=matrix, dsize=(width, height))
         right_img = Image.fromarray(right_img)
 
         processed = preprocess.get_transform(augment=False)
@@ -153,7 +155,7 @@ class myImageFloder(data.Dataset):
             left_img = processed(left_img)
             right_img = processed(right_img)
 
-            return left_img, right_img, dataL
+            return left_img, right_img, dataL, right
 
     def __len__(self):
         return len(self.left)
