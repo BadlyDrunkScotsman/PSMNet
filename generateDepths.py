@@ -124,15 +124,12 @@ def test(imgL, imgR, disp_true):
     else:
         img = output3
 
-    im_copy = img.cpu().numpy().copy()
-    im_copy = np.squeeze(im_copy, 0)
-
     im_m = img[mask]
     d_t = disp_true[mask]
 
     loss = F.l1_loss(im_m, d_t)  # torch.mean(torch.abs(img[mask]-disp_true[mask]))  # end-point-error
 
-    return loss.data.cpu(), im_copy
+    return loss.data.cpu(), img
 
 
 start_full_time = time.time()
@@ -140,16 +137,15 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
     test_loss, result = test(imgL, imgR, disp_L)
     print('Iter %d loss = %.3f' % (batch_idx, test_loss))
 
+    result = result.cpu().numpy()
     disp_L = disp_L.cpu().numpy()
 
     img = (result * 256).astype('uint16')
+    img = np.squeeze(img, axis=0)
     img = Image.fromarray(img)
 
-
-    gt_disp = np.asarray(disp_L * 256).astype('uint16')
-
-    print(gt_disp.shape)
-
+    gt_disp = (disp_L * 256).astype('uint16')
+    gt_disp = np.squeeze(gt_disp, axis=0)
     gt_disp = Image.fromarray(gt_disp)
 
     head, tail = os.path.split(r_path)
