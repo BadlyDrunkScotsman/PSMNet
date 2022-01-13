@@ -27,9 +27,9 @@ def is_image_file(filename):
 def dataloader(filepath):
 
     dir = filepath
-    dir_disp = filepath + '/cam_dep_60_Bl0/'
+    dir_disp = filepath + 'cam_dep_60_Bl0/'
 
-    subdir = ['/cam_60_BL0/', '/cam_60_BL30_ch_x/', '/cam_60_BL30_ch_y/', '/cam_60_BL30_ch_z/', '/cam_60_BL30_ch_roll/']
+    subdir = ['cam_60_BL0/', 'cam_60_BL30_ch_x/', 'cam_60_BL30_ch_y/', 'cam_60_BL30_ch_z/', 'cam_60_BL30_ch_roll/']
     
     right_transforms = []
 
