@@ -124,7 +124,7 @@ def test(imgL, imgR, disp_true):
     else:
         img = output3
 
-    im_copy = img.copy()
+    im_copy = img.numpy().copy()
     im_copy = np.squeeze(im_copy, 0)
 
     im_m = img[mask]
