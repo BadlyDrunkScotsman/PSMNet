@@ -140,7 +140,6 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
     test_loss, result = test(imgL, imgR, disp_L)
     print('Iter %d loss = %.3f' % (batch_idx, test_loss))
 
-    result = result.numpy()
     disp_L = disp_L.cpu().numpy()
 
     img = (result * 256).astype('uint16')
