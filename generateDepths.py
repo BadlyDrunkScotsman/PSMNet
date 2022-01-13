@@ -145,6 +145,9 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
     img = (result * 256).astype('uint16')
     img = Image.fromarray(img)
 
+
+    print(gt_disp.shape)
+
     gt_disp = np.asarray(disp_L * 256).astype('uint16')
     gt_disp = Image.fromarray(gt_disp)
 
