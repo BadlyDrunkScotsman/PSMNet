@@ -124,12 +124,15 @@ def test(imgL, imgR, disp_true):
     else:
         img = output3
 
+    im_copy = img.copy()
+    im_copy = np.squeeze(im_copy, 0)
+
     im_m = img[mask]
     d_t = disp_true[mask]
 
     loss = F.l1_loss(im_m, d_t)  # torch.mean(torch.abs(img[mask]-disp_true[mask]))  # end-point-error
 
-    return loss.data.cpu(), img
+    return loss.data.cpu(), im_copy
 
 
 start_full_time = time.time()
