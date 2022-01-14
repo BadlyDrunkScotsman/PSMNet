@@ -161,8 +161,10 @@ for batch_idx, (imgL, imgR, disp_L, r_path) in enumerate(TestImgLoader):
 
     curr_gt_outpath = outpath + dirname + "_gt/"
 
-    os.mkdir(curr_outpath)
-    os.mkdir(curr_gt_outpath)
+    if(os.path.exists(curr_outpath)):
+        os.mkdir(curr_outpath)
+    if(os.path.exists(curr_gt_outpath)):
+        os.mkdir(curr_gt_outpath)
 
     img.save(os.path.join(curr_outpath, img_name))
     gt_disp.save(os.path.join(curr_gt_outpath, img_name))
