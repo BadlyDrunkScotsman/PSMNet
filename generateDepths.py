@@ -45,8 +45,8 @@ datatype = 'custom'
 
 datapath = '/mnt/host/SSD/VIDAR/dane/20220107-2226_3_60FOV_BL30_NOWY/'
 
-model_path = '/mnt/host/SSD/VIDAR/trash/psmnet_aug_translaction/checkpoint_b30_fov60_29.tar'
-outpath = '/mnt/host/SSD/VIDAR/trash/uncalibrated_psmnet_results/'
+model_path = '/mnt/host/SSD/VIDAR/trash/psmnet_aug_no_translaction/checkpoint_b30_fov60_27.tar'
+outpath = '/mnt/host/SSD/VIDAR/trash/uncalibrated_psmnet_results_without_translaction/'
 no_cuda = False
 
 cuda = not no_cuda and torch.cuda.is_available()
