@@ -157,10 +157,6 @@ def main():
             imgL = infer_transform(imgL_o)
             imgR = infer_transform(imgR_o)
 
-            print(imgL.size())
-
-            print('time = %.2f' % (time.time() - start_time))
-
             # pad to width and hight to 16 times
             if imgL.shape[1] % 16 != 0:
                 times = imgL.shape[1]//16       
