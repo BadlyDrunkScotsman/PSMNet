@@ -81,12 +81,12 @@ def main():
 
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
+    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov90_bs15_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
-    datapath = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/'
+    datapath = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov90_bs15/'
     
-    outpath = '/mnt/host/SSD/VIDAR/trash/23_11_2021_fov70_bs15/'
+    outpath = '/mnt/host/SSD/VIDAR/trash/23_11_2021_fov90_bs15/'
 
     no_cuda = False
 
