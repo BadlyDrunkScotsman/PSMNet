@@ -191,21 +191,10 @@ def main():
             else:
                 img = pred_disp
 
-
-
-
-
-
-
-
-
-            print(imgL.size())
-
-            pred_disp = test(imgL, imgR, model, cuda)
-
-            print(pred_disp.shape)
-
-            img = pred_disp[pred_disp.shape[0] - h:, :-(pred_disp.shape[1] - w)]
+            #print(imgL.size())
+            #pred_disp = test(imgL, imgR, model, cuda)
+            #print(pred_disp.shape)
+            #img = pred_disp[pred_disp.shape[0] - h:, :-(pred_disp.shape[1] - w)]
             
             img = (img * 256).astype('uint16')
             img = Image.fromarray(img)
