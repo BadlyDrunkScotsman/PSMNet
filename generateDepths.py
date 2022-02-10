@@ -51,23 +51,8 @@ def test(imgL, imgR, model, cuda):
 
     return pred_disp
 
-def translate(img, x = 0, y = 0, z = 0, cv2 = None):
-    # get the width and height of the image
-    height, width = img.shape[:2]
 
-    # get tx and ty values for translation
-    # you can specify any value of your choice
-    ty, tx, tz = (width+(x*width*50))/width, (height+(y*height*50))/height, 1 - (z/10)
-
-    # create the translation matrix using tx and ty, it is a NumPy array
-    translation_matrix = np.array([
-        [tz, 0, tx],
-        [0, tz, ty]], dtype=np.float32)
-
-    return cv2.warpAffine(src=img, M=translation_matrix, dsize=(width, height))
-
-
-def disparity_loader(path, fov=60, baseline=0.15, width=1937):
+def disparity_loader(path, fov=90, baseline=0.15, width=1920):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
     ref_disp = (focal * baseline) / normalized_depth
@@ -94,16 +79,14 @@ def main():
     ugly_hack()
     import cv2
 
-
-
     maxdisp = 192
     seed = 1
-    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
+    model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov90_bs15_29.tar'
     model_type = 'stackhourglass'
     datatype = 'custom'
-    datapath = '/mnt/host/SSD/VIDAR/dane/calib/20210901-1216_y/'
+    datapath = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov90_bs15/'
     
-    outpath = '/mnt/host/SSD/VIDAR/trash/20210901-1216_y/'
+    outpath = '/mnt/host/SSD/VIDAR/trash/23_11_2021_fov90_bs15/'
 
     no_cuda = False
 
@@ -123,7 +106,7 @@ def main():
     elif datatype == '2012':
         from dataloader import KITTIloader2012 as ls
     elif datatype == 'custom':
-        from dataloader import FullDataSetLoader as ls
+        from dataloader import CustomDataSetLoader as ls
 
     all_left_img, all_right_img, all_left_disp, test_left_img, test_right_img, test_left_disp = ls.dataloader(datapath)
     
@@ -145,16 +128,16 @@ def main():
     print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
     # Using readlines()
-    file = open(datapath + 'changes.txt', 'r')
-    Lines = file.readlines()
-    file.close()
+    #file = open(datapath + 'changes.txt', 'r')
+    #Lines = file.readlines()
+    #file.close()
 
 
-    ground_truth_dir = outpath + '/ground/'
+    #ground_truth_dir = outpath + '/ground/'
     predicted_dir = outpath + '/predicted/'
 
-    if not os.path.exists(ground_truth_dir):
-        os.makedirs(ground_truth_dir)
+    #if not os.path.exists(ground_truth_dir):
+    #    os.makedirs(ground_truth_dir)
 
     if not os.path.exists(predicted_dir):
         os.makedirs(predicted_dir)
@@ -169,23 +152,6 @@ def main():
             # removing extension
             file_name = os.path.splitext(os.path.basename(test_left_img[idx]))[0]
 
-            trans_x = 0
-            trans_y = 0
-            trans_z = 0
-            
-            # Strips the newline character
-            for line in Lines:
-                line = line.strip()
-                values = line.split(' ')
-                if(values[0] == file_name):
-                    trans_x = float(values[3])
-                    trans_y = float(values[2])
-                    trans_z = float(values[1])
-
-
-            print(file_name +" trans_y: "+str(trans_y))
-            imgR_o = translate(imgR_o, trans_x, trans_y, trans_z, cv2)
-
             start_time = time.time()
             
             imgL = infer_transform(imgL_o)
@@ -195,21 +161,43 @@ def main():
 
             print('time = %.2f' % (time.time() - start_time))
 
-            # pad to width and hight to 32 times
-            if imgL.shape[1] % 32 != 0:
-                times = imgL.shape[1] // 32
-                top_pad = (times + 1) * 32 - imgL.shape[1]
+            # pad to width and hight to 16 times
+            if imgL.shape[1] % 16 != 0:
+                times = imgL.shape[1]//16       
+                top_pad = (times+1)*16 -imgL.shape[1]
             else:
                 top_pad = 0
 
-            if imgL.shape[2] % 32 != 0:
-                times = imgL.shape[2] // 32
-                right_pad = (times + 1) * 32 - imgL.shape[2]
+            if imgL.shape[2] % 16 != 0:
+                times = imgL.shape[2]//16                       
+                right_pad = (times+1)*16-imgL.shape[2]
             else:
-                right_pad = 0
+                right_pad = 0    
 
             imgL = F.pad(imgL, (0, right_pad, top_pad, 0)).unsqueeze(0)
             imgR = F.pad(imgR, (0, right_pad, top_pad, 0)).unsqueeze(0)
+
+            start_time = time.time()
+            pred_disp = test(imgL, imgR, model, cuda)
+            print('time = %.2f' %(time.time() - start_time))
+
+            
+            if top_pad !=0 and right_pad != 0:
+                img = pred_disp[top_pad:,:-right_pad]
+            elif top_pad ==0 and right_pad != 0:
+                img = pred_disp[:,:-right_pad]
+            elif top_pad !=0 and right_pad == 0:
+                img = pred_disp[top_pad:,:]
+            else:
+                img = pred_disp
+
+
+
+
+
+
+
+
 
             print(imgL.size())
 
@@ -222,8 +210,8 @@ def main():
             img = (img * 256).astype('uint16')
             img = Image.fromarray(img)
 
-            gt_disp = numpy.asarray(disparity_loader(test_left_disp[idx]) * 256).astype('uint16')
-            gt_disp = Image.fromarray(gt_disp)
+            #gt_disp = numpy.asarray(disparity_loader(test_left_disp[idx]) * 256).astype('uint16')
+            #gt_disp = Image.fromarray(gt_disp)
             
             head, tail = os.path.split(test_left_disp[idx])
 
@@ -232,7 +220,7 @@ def main():
             print("procesing: " + os.path.join(predicted_dir, img_name))
 
             img.save(os.path.join(predicted_dir, img_name))
-            gt_disp.save(os.path.join(ground_truth_dir, img_name))
+            #gt_disp.save(os.path.join(ground_truth_dir, img_name))
 
 if __name__ == '__main__':
     main()

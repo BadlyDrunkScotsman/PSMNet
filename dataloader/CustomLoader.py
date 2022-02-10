@@ -1,3 +1,4 @@
+from pickle import NONE
 import random
 
 import numpy as np
@@ -6,20 +7,19 @@ from PIL import Image
 
 from utils import preprocess
 
+
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
     '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
 ]
 
-
 def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
-
 
 def default_loader(path):
     return Image.open(path).convert('RGB')
 
-def disparity_loader(path, fov=60, baseline=0.3, width=1937):
+def disparity_loader(path, fov=90, baseline=0.15, width=1920):
     normalized_depth = depthmap_loader(path)
     focal = width / (2.0 * np.tan((fov * np.pi) / 360.0))
     ref_disp = (focal * baseline) / normalized_depth
@@ -55,9 +55,11 @@ class myImageFloder(data.Dataset):
         right = self.right[index]
         disp_L = self.disp_L[index]
 
+        #print(self.right[index])
+
         left_img = self.loader(left)
         right_img = self.loader(right)
-        dataL = self.disploader(disp_L)
+        dataL = None #self.disploader(disp_L)
 
         processed = preprocess.get_transform(augment=False)
 

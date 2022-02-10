@@ -18,7 +18,7 @@ import copy
 from models import *
 from subprocess import run
 
-from clearml import Task, Logger
+#from clearml import Task, Logger
 
 def ugly_hack():
     oh = run(["apt-get", "update"])
@@ -34,17 +34,17 @@ def switch_to_poziomka(task):
         task.execute_remotely(queue_name="default")
 
 
-task = Task.init("PSMNET", "Finetune")
-switch_to_poziomka(task)
-ugly_hack()
+#task = Task.init("PSMNET", "Finetune")
+#switch_to_poziomka(task)
+#ugly_hack()
 
 maxdisp = 192
 seed = 1
 loadmodel = None
 model_type = 'stackhourglass'
 datatype = 'custom'
-datapath = '/mnt/host/SSD/VIDAR/dane/20211126-1502_3_60FOV_BL30_BezMB'
-savemodel = '/mnt/host/SSD/VIDAR/trash/uncalibrated_psmnet_results/'
+datapath = 'D:/DataSets/20211221-1318_3_60FOV_BL30_BezMB'
+savemodel = 'D:/PSMNet_Res/Clean/'
 no_cuda = False
 epochs = 30
 
@@ -67,11 +67,11 @@ from dataloader import CustomLoader as DA
 
 TrainImgLoader = torch.utils.data.DataLoader(
          DA.myImageFloder(all_left_img,all_right_img,all_left_disp, True), 
-         batch_size= 6, shuffle= True, num_workers= 1, drop_last=False)
+         batch_size= 3, shuffle= True, num_workers=0, drop_last=False)
 
 TestImgLoader = torch.utils.data.DataLoader(
          DA.myImageFloder(test_left_img,test_right_img,test_left_disp, False), 
-         batch_size= 1, shuffle= False, num_workers= 1, drop_last=False)
+         batch_size= 1, shuffle= False, num_workers=0, drop_last=False)
 
 if model_type == 'stackhourglass':
     model = stackhourglass(maxdisp)
@@ -171,12 +171,12 @@ def main():
 
             loss = train(imgL_crop,imgR_crop, disp_crop_L)
             print('Iter %d training loss = %.3f , time = %.2f' %(batch_idx, loss, time.time() - start_time))
-            Logger.current_logger().report_scalar(
-                "Training", "loss", iteration=(((epoch - 1) * len(TrainImgLoader)) + batch_idx), value=loss)
+            #Logger.current_logger().report_scalar(
+            #    "Training", "loss", iteration=(((epoch - 1) * len(TrainImgLoader)) + batch_idx), value=loss)
             total_train_loss += loss
         print('epoch %d total training loss = %.3f' %(epoch, total_train_loss/len(TrainImgLoader)))
-        Logger.current_logger().report_scalar(
-                "Epoch_loss", "loss", iteration=epoch, value=(total_train_loss / len(TrainImgLoader)))
+        #Logger.current_logger().report_scalar(
+        #        "Epoch_loss", "loss", iteration=epoch, value=(total_train_loss / len(TrainImgLoader)))
 
 	   
         ## Test ##
