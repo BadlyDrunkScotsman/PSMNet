@@ -59,7 +59,7 @@ def main():
 
         resultimg = '/mnt/host/SSD/VIDAR/trash/out.png' # path to out image
 
-        model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov90_bs15_29.tar'
+        model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/15cm_50.tar'
 
         seed = 1
         
