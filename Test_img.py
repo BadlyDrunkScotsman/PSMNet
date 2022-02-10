@@ -54,7 +54,7 @@ def main():
         maxdisp = 192
 
 
-        leftimg = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/cam1/400.png' # path to left image
+        leftimg = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/cam2/400.png' # path to left image
         rightimg = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/cam1/400.png' # path to right image
 
         resultimg = '/mnt/host/SSD/VIDAR/trash/out.png' # path to out image
