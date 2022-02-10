@@ -54,10 +54,10 @@ def main():
         maxdisp = 192
 
 
-        leftimg = '/mnt/host/SSD/VIDAR/dane/croped_ds_15b_fov60/cam_60/44677.png' # path to left image
-        rightimg = '/mnt/host/SSD/VIDAR/dane/croped_ds_15b_fov60/cam_60_15bs/44677.png' # path to right image
+        leftimg = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/cam1/400.png' # path to left image
+        rightimg = '/mnt/host/SSD/VIDAR/dane/23_11_2021_fov70_bs15/cam1/400.png' # path to right image
 
-        resultimg = '/mnt/host/SSD/VIDAR/trash/44677.png' # path to out image
+        resultimg = '/mnt/host/SSD/VIDAR/trash/out.png' # path to out image
 
         model_path = '/mnt/host/SSD/VIDAR/modele/PSMNET/fov60_bs15_29.tar'
 
